@@ -129,3 +129,114 @@ Remove-Item "$env:USERPROFILE\AppData\Roaming\Microsoft\SPMigration\Logs\Migrati
 - Always run scripts with **Administrator privileges**.
 - The script includes error handling and will attempt to restore the service if errors occur.
 - If you don't specify a `-TargetPath`, the default location `D:\MigrationToolStorage` will be used.
+
+---
+
+# Find Long Paths in Directory
+
+This guide explains how to use the `find-long-paths.ps1` script to identify all file and directory paths that exceed a specified character length limit (useful for identifying paths that may cause issues with Windows path length limitations).
+
+---
+
+## ✅ Prerequisites
+- Windows OS
+- PowerShell execution policy set to allow running scripts
+
+---
+
+## ✅ Steps to Run the PowerShell Script
+
+1. **Open PowerShell**
+   - No administrator privileges required for this script
+
+2. **Set Execution Policy (if needed)**
+   ```powershell
+   Set-ExecutionPolicy RemoteSigned -Scope Process
+   ```
+
+3. **Navigate to the Script Directory**
+   ```powershell
+   cd path\to\windows-tools\sharepoint
+   ```
+
+4. **Execute the Script**
+   
+   **Basic usage** (scans directory and writes to default `long-paths.csv`):
+   ```powershell
+   .\find-long-paths.ps1 -Directory "C:\Path\To\Scan"
+   ```
+   
+   **Custom output file**:
+   ```powershell
+   .\find-long-paths.ps1 -Directory "C:\Path\To\Scan" -OutputFile "my-results.csv"
+   ```
+   
+   **Custom length threshold** (default is 280 characters):
+   ```powershell
+   .\find-long-paths.ps1 -Directory "C:\Path\To\Scan" -MaxLength 260
+   ```
+   
+   **All parameters together**:
+   ```powershell
+   .\find-long-paths.ps1 -Directory "C:\Path\To\Scan" -OutputFile "results.csv" -MaxLength 260
+   ```
+
+---
+
+## ✅ Script Features
+
+- **Recursive scanning**: Scans all files and directories within the specified directory
+- **Incremental CSV writing**: Writes results to CSV file immediately as long paths are found, avoiding large memory usage
+- **Full path preservation**: All paths are written to CSV in full without truncation
+- **Progress indicators**: Shows progress during scanning
+- **Summary statistics**: Displays total items scanned and count of long paths found
+- **Top 10 preview**: Shows the 10 longest paths in the console after scanning
+
+---
+
+## ✅ CSV Output Format
+
+The script generates a CSV file with the following columns:
+
+- **Path**: The full path to the file or directory (complete, not truncated)
+- **Length**: The character length of the full path
+- **Type**: Either "File" or "Directory"
+- **Name**: The name of the file or directory
+- **Directory**: The parent directory path
+
+---
+
+## ✅ Example Output
+
+After running the script, you'll see output like:
+
+```
+Scanning directory: C:\MyDirectory
+Looking for paths exceeding 280 characters...
+
+Scanning files...
+  Scanned 100 items, found 5 long paths...
+  Scanned 200 items, found 12 long paths...
+Scanning directories...
+
+Scan complete. Total items scanned: 1,234
+Long paths found: 47
+
+Results exported to: C:\path\to\long-paths.csv
+
+Top 10 longest paths:
+Length Type       Path
+------ ----       ----
+  342  File       C:\MyDirectory\Very\Long\Path\Structure\...
+  335  Directory  C:\MyDirectory\Another\Very\Long\Path\...
+  ...
+```
+
+---
+
+### ✅ Notes
+- The script writes to CSV incrementally, so results are saved even if the script is interrupted
+- No administrator privileges are required
+- The script handles errors gracefully and ensures the CSV file is properly closed
+- If no long paths are found, the CSV file will not be created
+- The default maximum length is 280 characters, which is useful for identifying paths that may exceed Windows path limits
